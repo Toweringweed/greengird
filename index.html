@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GreenGrid · 西安周边园区绿色能源管理平台</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080f0b;--bg2:#0d1810;--bg3:#111f15;
+  --surface:#162118;--surface2:#1c2b1e;
+  --border:#253328;--border2:#2f4033;
+  --green:#1fbe82;--green2:#14a06d;--green3:#0d7a53;
+  --greendim:#0b5c3e;--greenglw:rgba(31,190,130,0.12);
+  --amber:#e8a61a;--amberdim:rgba(232,166,26,0.15);
+  --blue:#3b8fd4;--bluedim:rgba(59,143,212,0.15);
+  --purple:#9b72cf;--purpledim:rgba(155,114,207,0.15);
+  --red:#e05252;--reddim:rgba(224,82,82,0.12);
+  --text:#d4ead9;--text2:#7fa886;--text3:#4a6e52;
+  --mono:'IBM Plex Mono',monospace;--sans:'Noto Sans SC',sans-serif;
+  --r:8px;--r2:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;background:var(--bg);color:var(--text)}
+body{font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;background:var(--bg);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:50px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:220px}
+.brand-icon{width:32px;height:32px;background:var(--green3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.brand-name{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);letter-spacing:.05em}
+.brand-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px;min-width:260px;justify-content:flex-end}
+.live-badge{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--green);background:var(--greenglw);padding:3px 9px;border-radius:16px;border:1px solid var(--greendim)}
+.pdot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(31,190,130,.5)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(31,190,130,0)}}
+.clock-tag{font-family:var(--mono);font-size:11px;color:var(--text2);background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:var(--r)}
+.user-chip{display:flex;align-items:center;gap:7px;padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:.15s}
+.user-chip:hover{border-color:var(--border2)}
+.user-avatar{width:22px;height:22px;border-radius:50%;background:var(--green3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white}
+.user-name{font-size:11px;color:var(--text2)}
+.user-role{font-family:var(--mono);font-size:9px;color:var(--text3)}
+
+/* LAYOUT */
+.app-layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px)}
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:10px 0 0;overflow-y:auto;display:flex;flex-direction:column}
+/* sidebar top: overview shortcut */
+.sb-overview{display:flex;align-items:center;gap:9px;padding:8px 14px 10px;margin-bottom:2px;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:.12s}
+.sb-overview:hover{color:var(--text);background:var(--surface)}
+.sb-overview.active{color:var(--green);background:var(--greenglw)}
+.sb-section{margin-bottom:4px}
+.sb-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);padding:10px 14px 4px;display:flex;align-items:center;gap:6px}
+.sb-label::before{content:'';flex:1;height:1px;background:var(--border);display:none}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--text2);transition:.12s;border-left:2px solid transparent;outline:none;user-select:none}
+.sb-item:focus{outline:none}
+.sb-item:hover{color:var(--text);background:var(--surface)}
+.sb-item.active{color:var(--green);background:var(--greenglw);border-left-color:var(--green)}
+.sb-icon{width:15px;height:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+.sb-badge{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:6px}
+.sb-badge.g{background:var(--greenglw);color:var(--green)}
+.sb-badge.a{background:var(--amberdim);color:var(--amber)}
+.sb-badge.r{background:var(--reddim);color:var(--red)}
+.sb-badge.b{background:var(--bluedim);color:var(--blue)}
+.sb-badge.p{background:var(--purpledim);color:var(--purple)}
+.sb-bottom{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border)}
+.mini-stat{display:flex;justify-content:space-between;padding:4px 0}
+.mini-stat-l{font-size:10px;color:var(--text3)}
+.mini-stat-v{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:18px 20px;background:var(--bg)}
+.page{display:none}.page.active{display:block}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text3)}
+.sec-actions{display:flex;align-items:center;gap:8px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r);font-size:12px;font-family:var(--sans);cursor:pointer;transition:.15s;border:1px solid;font-weight:500;outline:none}
+.btn-primary{background:var(--green3);border-color:var(--green2);color:white}
+.btn-primary:hover{background:var(--green2)}
+.btn-secondary{background:var(--surface);border-color:var(--border2);color:var(--text2)}
+.btn-secondary:hover{color:var(--text);border-color:var(--text3)}
+.btn-danger{background:var(--reddim);border-color:rgba(224,82,82,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(224,82,82,.2)}
+.btn-sm{padding:3px 9px;font-size:11px}
+.btn-icon{padding:5px 8px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:13px 15px;position:relative;overflow:hidden;animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi-card.g::before{background:var(--green)}.kpi-card.b::before{background:var(--blue)}
+.kpi-card.a::before{background:var(--amber)}.kpi-card.t::before{background:#0fb8a0}
+.kpi-card.p::before{background:var(--purple)}
+.kpi-glow{position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;opacity:.06;pointer-events:none}
+.kpi-card.g .kpi-glow{background:var(--green)}.kpi-card.b .kpi-glow{background:var(--blue)}
+.kpi-card.a .kpi-glow{background:var(--amber)}.kpi-card.t .kpi-glow{background:#0fb8a0}
+.kpi-label{font-size:10px;color:var(--text3);margin-bottom:6px}
+.kpi-value{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1;color:var(--text)}
+.kpi-value .unit{font-size:12px;font-weight:400;color:var(--text2);margin-left:3px}
+.kpi-delta{margin-top:6px;font-size:10px;font-weight:500}
+.kpi-delta.up{color:var(--green)}.kpi-delta.dn{color:var(--red)}.kpi-delta.neu{color:var(--amber)}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;animation:fadeUp .5s ease both}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.panel-title{font-size:12px;font-weight:500;color:var(--text)}
+.panel-meta{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid-21{display:grid;grid-template-columns:1.6fr 1fr;gap:12px}
+.grid-12{display:grid;grid-template-columns:1fr 1.6fr;gap:12px}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{background:var(--bg3);padding:7px 10px;text-align:left;font-size:10px;font-weight:500;color:var(--text2);font-family:var(--mono);border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surface2);color:var(--text)}
+.tbl-actions{display:flex;gap:5px}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 6px;border-radius:6px}
+.badge.g{background:var(--greenglw);color:var(--green)}
+.badge.a{background:var(--amberdim);color:var(--amber)}
+.badge.r{background:var(--reddim);color:var(--red)}
+.badge.b{background:var(--bluedim);color:var(--blue)}
+.badge.p{background:var(--purpledim);color:var(--purple)}
+.badge.gray{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+
+/* FORM / MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);width:540px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;animation:fadeUp .2s ease}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:14px;font-weight:500;color:var(--text)}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.modal-close:hover{background:var(--surface2);color:var(--text)}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* FORM ELEMENTS */
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;color:var(--text2);margin-bottom:5px;display:block;font-weight:500}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;font-size:12px;color:var(--text);font-family:var(--sans);outline:none;transition:.15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green2);box-shadow:0 0 0 2px rgba(31,190,130,.12)}
+.form-select option{background:var(--bg2)}
+.form-textarea{resize:vertical;min-height:70px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-hint{font-size:10px;color:var(--text3);margin-top:4px}
+
+/* TABS inside pages */
+.inner-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px}
+.itab{padding:7px 14px;border:none;background:transparent;font-size:11px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:var(--sans);transition:.15s}
+.itab.active{color:var(--green);border-bottom-color:var(--green)}
+.itab:hover:not(.active){color:var(--text)}
+.itab-page{display:none}.itab-page.active{display:block}
+
+/* PROGRESS BAR */
+.prog-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+
+/* PERMISSION GRID */
+.perm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.perm-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:.15s}
+.perm-item:hover{border-color:var(--border2)}
+.perm-item.checked{border-color:var(--green2);background:var(--greenglw)}
+.perm-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.perm-item.checked .perm-check{background:var(--green);border-color:var(--green);color:white;font-size:9px}
+.perm-name{font-size:11px;color:var(--text2)}
+.perm-item.checked .perm-name{color:var(--text)}
+
+/* SOURCE BARS */
+.src-bars{display:flex;flex-direction:column;gap:8px}
+.src-row{display:flex;align-items:center;gap:10px}
+.src-name{font-size:10px;color:var(--text2);width:52px;flex-shrink:0}
+
+/* DEVICE ITEM */
+.dev-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);transition:.15s}
+.dev-item:hover{border-color:var(--border2)}
+.dev-left{display:flex;align-items:center;gap:8px}
+.dev-icon{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.dev-name{font-size:11px;font-weight:500;color:var(--text)}
+.dev-sub{font-size:9px;color:var(--text3);margin-top:1px}
+
+/* STATUS TAGS */
+.stag{font-family:var(--mono);font-size:9px;font-weight:600;padding:2px 7px;border-radius:8px;text-transform:uppercase}
+.stag.on{background:var(--greenglw);color:var(--green);border:1px solid var(--greendim)}
+.stag.idle{background:var(--amberdim);color:var(--amber);border:1px solid rgba(232,166,26,.3)}
+.stag.off{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+
+/* ALERT ITEM */
+.alert-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.alert-dot{margin-top:3px;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* GAUGE */
+.gauge-wrap{position:relative;width:110px;height:66px;overflow:hidden}
+.gauge-wrap svg{position:absolute;top:0;left:0}
+.gauge-num{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);white-space:nowrap}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--green2);border-radius:var(--r);padding:10px 16px;font-size:12px;color:var(--text);z-index:2000;animation:fadeUp .3s ease;display:none;gap:8px;align-items:center}
+.toast.show{display:flex}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:10px}
+.empty-text{font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🌿</div>
+    <div>
+      <div class="brand-name">GREENGRID</div>
+      <div class="brand-sub">西安周边园区绿色能源管理平台</div>
+    </div>
+  </div>
+
+  <!-- breadcrumb replaces nav tabs -->
+  <div id="breadcrumb" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)">
+    <span style="color:var(--text2)">总览</span>
+  </div>
+
+  <div class="topbar-right">
+    <div class="live-badge"><div class="pdot"></div>实时监控</div>
+    <div class="clock-tag" id="clock">--:--:--</div>
+    <div class="user-chip" onclick="goSystem()">
+      <div class="user-avatar">管</div>
+      <div>
+        <div class="user-name">张明远</div>
+        <div class="user-role">超级管理员</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+
+    <!-- 总览入口 -->
+    <div class="sb-overview active" id="sb-overview" onclick="navOverview(this)">
+      <span style="font-size:15px">🏠</span>
+      <span>总览仪表盘</span>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">⚡ 供给侧</div>
+      <div class="sb-item" onclick="navTo('supply-mgmt','supply-list',this)">
+        <div class="sb-icon">📋</div>供给资源总览
+        <span class="sb-badge g" id="sb-supply-count">5</span>
+      </div>
+      <div class="sb-item" onclick="navTo('supply-mgmt','supply-wind',this)">
+        <div class="sb-icon">💨</div>风力发电
+        <span class="sb-badge g">运行</span>
+      </div>
+      <div class="sb-item" onclick="navTo('supply-mgmt','supply-solar',this)">
+        <div class="sb-icon">☀</div>光伏发电
+        <span class="sb-badge g">运行</span>
+      </div>
+      <div class="sb-item" onclick="navTo('supply-mgmt','supply-storage',this)">
+        <div class="sb-icon">🔋</div>储能系统
+        <span class="sb-badge a">充电</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">🔌 需求侧</div>
+      <div class="sb-item" onclick="navTo('demand-mgmt','demand-industry',this)">
+        <div class="sb-icon">🏭</div>工业企业
+        <span class="sb-badge b" id="sb-industry-count">7</span>
+      </div>
+      <div class="sb-item" onclick="navTo('demand-mgmt','demand-dc',this)">
+        <div class="sb-icon">🖥</div>算力中心
+        <span class="sb-badge b">5座</span>
+      </div>
+      <div class="sb-item" onclick="navTo('demand-mgmt','demand-ev',this)">
+        <div class="sb-icon">🔌</div>充电桩网络
+        <span class="sb-badge b">新</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">📊 运营管理</div>
+      <div class="sb-item" onclick="navSimple('trade',this)">
+        <div class="sb-icon">💱</div>绿电交易
+      </div>
+      <div class="sb-item" onclick="navSimple('carbon',this)">
+        <div class="sb-icon">🌱</div>碳排放核算
+      </div>
+      <div class="sb-item" onclick="navSimple('alerts',this)">
+        <div class="sb-icon">⚠</div>告警中心
+        <span class="sb-badge r" id="alert-badge">2</span>
+      </div>
+      <div class="sb-item" onclick="navSimple('reports',this)">
+        <div class="sb-icon">📋</div>报告中心
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">⚙ 系统管理</div>
+      <div class="sb-item" onclick="navSystem('users',this)">
+        <div class="sb-icon">👤</div>用户管理
+      </div>
+      <div class="sb-item" onclick="navSystem('roles',this)">
+        <div class="sb-icon">🎭</div>角色管理
+      </div>
+      <div class="sb-item" onclick="navSystem('permissions',this)">
+        <div class="sb-icon">🔐</div>权限管理
+      </div>
+      <div class="sb-item" onclick="navSystem('config',this)">
+        <div class="sb-icon">⚙</div>系统配置
+      </div>
+      <div class="sb-item" onclick="navSystem('audit',this)">
+        <div class="sb-icon">📑</div>操作审计
+      </div>
+    </div>
+
+    <div class="sb-bottom">
+      <div class="mini-stat"><span class="mini-stat-l">在线设备</span><span class="mini-stat-v" id="sb-online">18/20</span></div>
+      <div class="mini-stat"><span class="mini-stat-l">清洁能源率</span><span class="mini-stat-v">87%</span></div>
+      <div class="mini-stat"><span class="mini-stat-l">今日发电</span><span class="mini-stat-v">38.2MWh</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ══ PAGE: 总览 ══ -->
+    <div class="page active" id="page-overview">
+      <div class="sec-hdr">
+        <div class="sec-title">实时总览</div>
+        <div class="sec-actions">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--text3)" id="date-display">--</span>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card g"><div class="kpi-glow"></div>
+          <div class="kpi-label">当前总发电量</div>
+          <div class="kpi-value" id="kpi-gen">5,124<span class="unit">kW</span></div>
+          <div class="kpi-delta up">↑ 风光联合出力</div>
+        </div>
+        <div class="kpi-card b"><div class="kpi-glow"></div>
+          <div class="kpi-label">园区今日用电</div>
+          <div class="kpi-value">42.6<span class="unit">MWh</span></div>
+          <div class="kpi-delta dn">↓ 2.8% vs 昨日</div>
+        </div>
+        <div class="kpi-card t"><div class="kpi-glow"></div>
+          <div class="kpi-label">绿电消纳率</div>
+          <div class="kpi-value">87<span class="unit">%</span></div>
+          <div class="kpi-delta up">↑ 目标 95%</div>
+        </div>
+        <div class="kpi-card a"><div class="kpi-glow"></div>
+          <div class="kpi-label">今日碳减排</div>
+          <div class="kpi-value">2.89<span class="unit">tCO₂</span></div>
+          <div class="kpi-delta up">↑ ≈ 种树 144 棵</div>
+        </div>
+      </div>
+
+      <div class="grid-21" style="margin-bottom:12px">
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">能源结构</span><span class="panel-meta">24h</span></div>
+          <div class="src-bars">
+            <div class="src-row"><span class="src-name">关中光伏</span><div class="prog-track"><div class="prog-fill" style="width:54%;background:#1fbe82"></div></div><span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#1fbe82;width:28px;text-align:right">54%</span></div>
+            <div class="src-row"><span class="src-name">渭北风电</span><div class="prog-track"><div class="prog-fill" style="width:28%;background:#3b8fd4"></div></div><span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#3b8fd4;width:28px;text-align:right">28%</span></div>
+            <div class="src-row"><span class="src-name">储能放电</span><div class="prog-track"><div class="prog-fill" style="width:10%;background:#e8a61a"></div></div><span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#e8a61a;width:28px;text-align:right">10%</span></div>
+            <div class="src-row"><span class="src-name">市电补充</span><div class="prog-track"><div class="prog-fill" style="width:8%;background:#4a6e52"></div></div><span style="font-family:var(--mono);font-size:10px;font-weight:600;color:#4a6e52;width:28px;text-align:right">8%</span></div>
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:7px">7 日发电趋势 (MWh)</div>
+            <div style="display:flex;align-items:flex-end;gap:4px;height:48px" id="trend7d"></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:3px;font-family:var(--mono)">
+              <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>今</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">供需资源总览</span></div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="dev-item">
+              <div class="dev-left"><div class="dev-icon" style="background:rgba(31,190,130,.1)">💨</div><div><div class="dev-name">渭北风电场</div><div class="dev-sub">200MW · 渭南/铜川</div></div></div>
+              <span class="stag on">运行</span>
+            </div>
+            <div class="dev-item">
+              <div class="dev-left"><div class="dev-icon" style="background:rgba(232,166,26,.1)">☀</div><div><div class="dev-name">关中光伏 A区</div><div class="dev-sub">屋顶光伏 · 320kW</div></div></div>
+              <span class="stag on">运行</span>
+            </div>
+            <div class="dev-item">
+              <div class="dev-left"><div class="dev-icon" style="background:rgba(59,143,212,.1)">🔌</div><div><div class="dev-name">充电桩集群 · 高新区</div><div class="dev-sub">120桩 · 3,600kW</div></div></div>
+              <span class="stag on">运行</span>
+            </div>
+            <div class="dev-item">
+              <div class="dev-left"><div class="dev-icon" style="background:rgba(232,166,26,.1)">🔋</div><div><div class="dev-name">储能单元 S-1</div><div class="dev-sub">20MWh · 充电中 76%</div></div></div>
+              <span class="stag idle">待机</span>
+            </div>
+            <div class="dev-item">
+              <div class="dev-left"><div class="dev-icon" style="background:rgba(224,82,82,.1)">⚙</div><div><div class="dev-name">逆变器 #12</div><div class="dev-sub">配电室 B</div></div></div>
+              <span class="stag off">离线</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">碳减排进度</span><span class="panel-meta">2025年度</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <div class="gauge-wrap">
+              <svg width="110" height="66" viewBox="0 0 110 66"><path d="M7 64A48 48 0 0 1 103 64" fill="none" stroke="#162118" stroke-width="9" stroke-linecap="round"/><path d="M7 64A48 48 0 0 1 103 64" fill="none" stroke="#1fbe82" stroke-width="9" stroke-linecap="round" stroke-dasharray="150" stroke-dashoffset="37"/></svg>
+              <div class="gauge-num">78%</div>
+            </div>
+            <div style="font-size:10px;color:var(--text3);text-align:center">年度目标 650t CO₂</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%">
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">507t</div><div style="font-size:9px;color:var(--text3);margin-top:1px">已减排</div></div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700">2.89t</div><div style="font-size:9px;color:var(--text3);margin-top:1px">今日</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">明日预测</span><span class="panel-meta">AI模型</span></div>
+          <div style="display:flex;align-items:flex-end;gap:2px;height:72px;margin-bottom:5px" id="fc-bars"></div>
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:10px"><span>6h</span><span>10h</span><span>14h</span><span>18h</span><span>22h</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px;text-align:center"><div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green)">5,680kW</div><div style="font-size:9px;color:var(--text3);margin-top:1px">预测峰值</div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px;text-align:center"><div style="font-family:var(--mono);font-size:12px;font-weight:700">晴转多云</div><div style="font-size:9px;color:var(--text3);margin-top:1px">明日天气</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">系统概况</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <span style="font-size:11px;color:var(--text2)">接入供给资源</span>
+              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--green)" id="ov-supply-total">5 项</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <span style="font-size:11px;color:var(--text2)">接入需求侧主体</span>
+              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--blue)" id="ov-demand-total">215 家</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <span style="font-size:11px;color:var(--text2)">系统用户</span>
+              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--purple)" id="ov-user-total">12 人</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <span style="font-size:11px;color:var(--text2)">未处理告警</span>
+              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--red)">2 条</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:7px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <span style="font-size:11px;color:var(--text2)">今日绿电交易</span>
+              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--amber)">¥ 24.6万</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: 供给管理 ══ -->
+    <div class="page" id="page-supply-mgmt">
+      <div class="sec-hdr">
+        <div class="sec-title">供给侧资源管理</div>
+        <div class="sec-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-add-supply')">＋ 新增供给资源</button>
+        </div>
+      </div>
+
+      <div class="inner-tabs">
+        <button class="itab active" id="itab-btn-supply-list"     onclick="switchInnerTab('supply-list',this)">资源总览</button>
+        <button class="itab"        id="itab-btn-supply-wind"     onclick="switchInnerTab('supply-wind',this)">💨 风力发电</button>
+        <button class="itab"        id="itab-btn-supply-solar"    onclick="switchInnerTab('supply-solar',this)">☀ 光伏发电</button>
+        <button class="itab"        id="itab-btn-supply-monitor"  onclick="switchInnerTab('supply-monitor',this)">实时监控</button>
+        <button class="itab"        id="itab-btn-supply-storage"  onclick="switchInnerTab('supply-storage',this)">🔋 储能系统</button>
+      </div>
+
+      <!-- supply-list -->
+      <div class="itab-page active" id="itab-supply-list">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">接入资源总数</div><div class="kpi-value" id="supply-count-kpi">5<span class="unit">项</span></div><div class="kpi-delta up">↑ 本月新增 1</div></div>
+          <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">总装机容量</div><div class="kpi-value">530<span class="unit">MW</span></div><div class="kpi-delta up">风电200+光伏330</div></div>
+          <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">当前总出力</div><div class="kpi-value" id="supply-power">5,124<span class="unit">kW</span></div><div class="kpi-delta up">↑ 正常</div></div>
+          <div class="kpi-card t"><div class="kpi-glow"></div><div class="kpi-label">在线设备</div><div class="kpi-value">18<span class="unit">/20</span></div><div class="kpi-delta dn">↓ 1台告警</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title">供给资源列表</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input class="form-input" style="width:160px;padding:5px 9px;font-size:11px" placeholder="搜索资源名称..." oninput="filterTable(this,'supply-tbl')">
+              <select class="form-select" style="width:110px;padding:5px 8px;font-size:11px" onchange="filterTable(this,'supply-tbl','type')">
+                <option value="">全部类型</option>
+                <option value="风力">风力发电</option>
+                <option value="光伏">光伏发电</option>
+                <option value="屋顶">屋顶光伏</option>
+                <option value="储能">储能系统</option>
+              </select>
+            </div>
+          </div>
+          <table class="tbl" id="supply-tbl">
+            <thead><tr><th>资源名称</th><th>类型</th><th>位置</th><th>装机容量</th><th>当前出力</th><th>接入时间</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="supply-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- supply-wind -->
+      <div class="itab-page" id="itab-supply-wind">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">当前出力</div><div class="kpi-value">1,435<span class="unit">kW</span></div><div class="kpi-delta up">↑ 额定72%</div></div>
+          <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">今日发电量</div><div class="kpi-value">8.2<span class="unit">MWh</span></div><div class="kpi-delta up">↑ 同比+6%</div></div>
+          <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">平均风速</div><div class="kpi-value">7.4<span class="unit">m/s</span></div><div class="kpi-delta up">↑ 渭北旱塬</div></div>
+          <div class="kpi-card t"><div class="kpi-glow"></div><div class="kpi-label">弃风率</div><div class="kpi-value">2.1<span class="unit">%</span></div><div class="kpi-delta up">↓ 历史低位</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:12px">
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">💨 24小时功率曲线</span><span class="panel-meta">渭北风场 · 渭南/铜川</span></div>
+            <div style="display:flex;align-items:flex-end;gap:2px;height:80px;margin-bottom:6px" id="wind-chart-detail"></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:12px"><span>0h</span><span>4h</span><span>8h</span><span>12h</span><span>16h</span><span>20h</span><span>24h</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue)">200MW</div><div style="font-size:9px;color:var(--text3);margin-top:2px">装机容量</div></div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700">8/10</div><div style="font-size:9px;color:var(--text3);margin-top:2px">风机在线</div></div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">2,100h</div><div style="font-size:9px;color:var(--text3);margin-top:2px">年利用小时</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">风机组状态</span><span class="panel-meta">10台</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="wind-turbines"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- supply-solar -->
+      <div class="itab-page" id="itab-supply-solar">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">当前出力</div><div class="kpi-value">2,767<span class="unit">kW</span></div><div class="kpi-delta up">↑ 效率84%</div></div>
+          <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">今日发电量</div><div class="kpi-value">18.4<span class="unit">MWh</span></div><div class="kpi-delta up">↑ 同比+11%</div></div>
+          <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">辐照强度</div><div class="kpi-value">624<span class="unit">W/㎡</span></div><div class="kpi-delta up">↑ 关中晴天</div></div>
+          <div class="kpi-card t"><div class="kpi-glow"></div><div class="kpi-label">在线组串</div><div class="kpi-value">148<span class="unit">/150</span></div><div class="kpi-delta dn">↓ 2串异常</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:12px">
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">☀ 24小时功率曲线</span><span class="panel-meta">关中平原 · 高新区/经开区</span></div>
+            <div style="display:flex;align-items:flex-end;gap:2px;height:80px;margin-bottom:6px" id="solar-chart-detail"></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:12px"><span>0h</span><span>4h</span><span>8h</span><span>12h</span><span>16h</span><span>20h</span><span>24h</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--amber)">330MW</div><div style="font-size:9px;color:var(--text3);margin-top:2px">装机容量</div></div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700">2,200h</div><div style="font-size:9px;color:var(--text3);margin-top:2px">年均日照</div></div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green)">84.2%</div><div style="font-size:9px;color:var(--text3);margin-top:2px">系统效率</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">光伏阵列分布</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="padding:9px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;font-weight:500;color:var(--text)">A区 · 高新区屋顶</span><span class="stag on">运行</span></div>
+                <div style="display:flex;gap:12px;font-size:10px;color:var(--text3)"><span>320kW</span><span style="color:var(--green)">效率85%</span><span>48串在线</span></div>
+              </div>
+              <div style="padding:9px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;font-weight:500;color:var(--text)">B区 · 经开区地面</span><span class="stag on">运行</span></div>
+                <div style="display:flex;gap:12px;font-size:10px;color:var(--text3)"><span>2,800kW</span><span style="color:var(--green)">效率84%</span><span>420串在线</span></div>
+              </div>
+              <div style="padding:9px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;font-weight:500;color:var(--text)">C区 · 航天基地屋顶</span><span class="stag idle">待检</span></div>
+                <div style="display:flex;gap:12px;font-size:10px;color:var(--text3)"><span>500kW</span><span style="color:var(--amber)">2串异常</span><span>78串在线</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- supply-monitor -->
+      <div class="itab-page" id="itab-supply-monitor">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">💨 渭北风电场 · 24h功率</span><span class="panel-meta" style="color:var(--blue)">1,435 kW</span></div>
+            <div style="display:flex;align-items:flex-end;gap:2px;height:64px;margin-bottom:6px" id="wind-chart"></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:var(--mono)"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">☀ 关中光伏 · 24h功率</span><span class="panel-meta" style="color:var(--amber)">2,767 kW</span></div>
+            <div style="display:flex;align-items:flex-end;gap:2px;height:64px;margin-bottom:6px" id="solar-chart"></div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:var(--mono)"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- supply-storage -->
+      <div class="itab-page" id="itab-supply-storage">
+        <div class="kpi-grid">
+          <div class="kpi-card t"><div class="kpi-glow"></div><div class="kpi-label">当前 SOC</div><div class="kpi-value">76<span class="unit">%</span></div><div class="kpi-delta up">↑ 充电中</div></div>
+          <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">充电功率</div><div class="kpi-value">512<span class="unit">kW</span></div><div class="kpi-delta up">↑ 谷电充储</div></div>
+          <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">总装机</div><div class="kpi-value">20<span class="unit">MWh</span></div><div class="kpi-delta neu">4组×5MWh</div></div>
+          <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">今日套利</div><div class="kpi-value">3.2<span class="unit">万元</span></div><div class="kpi-delta up">↑ 价差0.38元</div></div>
+        </div>
+        <div class="panel" style="margin-top:12px">
+          <div class="panel-hdr"><span class="panel-title">电池组实时状态</span></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" id="bms-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: 需求管理 ══ -->
+    <div class="page" id="page-demand-mgmt">
+      <div class="sec-hdr">
+        <div class="sec-title">需求侧主体管理</div>
+        <div class="sec-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-add-demand')">＋ 新增需求主体</button>
+        </div>
+      </div>
+
+      <div class="inner-tabs">
+        <button class="itab active" id="itab-btn-demand-list"     onclick="switchInnerTab('demand-list',this)">主体总览</button>
+        <button class="itab"        id="itab-btn-demand-industry" onclick="switchInnerTab('demand-industry',this)">🏭 工业企业</button>
+        <button class="itab"        id="itab-btn-demand-dc"       onclick="switchInnerTab('demand-dc',this)">🖥 算力中心</button>
+        <button class="itab"        id="itab-btn-demand-ev"       onclick="switchInnerTab('demand-ev',this)">🔌 充电桩</button>
+      </div>
+
+      <div class="itab-page active" id="itab-demand-list">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+          <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">接入主体总数</div><div class="kpi-value" id="demand-count-kpi">215<span class="unit">家</span></div><div class="kpi-delta up">↑ 本月新增 3</div></div>
+          <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">今日总用电</div><div class="kpi-value">126<span class="unit">MWh</span></div><div class="kpi-delta dn">↓ 1.2%</div></div>
+          <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">平均绿电比例</div><div class="kpi-value">79<span class="unit">%</span></div><div class="kpi-delta up">↑ 目标80%</div></div>
+          <div class="kpi-card t"><div class="kpi-glow"></div><div class="kpi-label">充电桩总功率</div><div class="kpi-value">3,600<span class="unit">kW</span></div><div class="kpi-delta up">↑ 120桩运行</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title">需求主体列表</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input class="form-input" style="width:160px;padding:5px 9px;font-size:11px" placeholder="搜索主体名称..." oninput="filterTable(this,'demand-tbl')">
+              <select class="form-select" style="width:110px;padding:5px 8px;font-size:11px" onchange="filterTable(this,'demand-tbl','type')">
+                <option value="">全部类型</option>
+                <option value="工业">工业企业</option>
+                <option value="算力">算力中心</option>
+                <option value="充电">充电桩</option>
+              </select>
+            </div>
+          </div>
+          <table class="tbl" id="demand-tbl">
+            <thead><tr><th>主体名称</th><th>类型</th><th>所在园区</th><th>今日用电</th><th>绿电比例</th><th>接入时间</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="demand-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="itab-page" id="itab-demand-industry">
+        <div class="panel"><div class="panel-hdr"><span class="panel-title">🏭 工业企业用电详情</span></div>
+          <table class="tbl"><thead><tr><th>企业名称</th><th>今日用电</th><th>绿电比例</th><th>Scope2排放</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>秦川机床集团</td><td>12,400 kWh</td><td><span class="badge g">91%</span></td><td>48t CO₂</td><td style="color:var(--green)">达标</td></tr>
+            <tr><td>隆基绿能厂区</td><td>21,300 kWh</td><td><span class="badge g">96%</span></td><td>36t CO₂</td><td style="color:var(--green)">优秀</td></tr>
+            <tr><td>比亚迪西安工厂</td><td>31,500 kWh</td><td><span class="badge a">62%</span></td><td>520t CO₂</td><td style="color:var(--amber)">提升中</td></tr>
+            <tr><td>三星存储西安</td><td>44,200 kWh</td><td><span class="badge a">55%</span></td><td>870t CO₂</td><td style="color:var(--amber)">提升中</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <div class="itab-page" id="itab-demand-dc">
+        <div class="panel"><div class="panel-hdr"><span class="panel-title">🖥 算力中心用电 & PUE</span></div>
+          <table class="tbl"><thead><tr><th>数据中心</th><th>今日用电</th><th>PUE</th><th>绿电</th><th>碳强度</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>秦创原算力中心</td><td>18,600 kWh</td><td style="color:var(--green)">1.28</td><td><span class="badge g">100%</span></td><td style="color:var(--green)">0.00</td><td style="color:var(--green)">净零</td></tr>
+            <tr><td>华为西安数据中心</td><td>38,400 kWh</td><td style="color:var(--green)">1.22</td><td><span class="badge g">100%</span></td><td style="color:var(--green)">0.00</td><td style="color:var(--green)">净零</td></tr>
+            <tr><td>西部云谷 IDC</td><td>24,100 kWh</td><td style="color:var(--amber)">1.35</td><td><span class="badge g">89%</span></td><td>0.14</td><td style="color:var(--amber)">良好</td></tr>
+            <tr><td>阿里云西安节点</td><td>29,800 kWh</td><td style="color:var(--amber)">1.41</td><td><span class="badge a">71%</span></td><td style="color:var(--amber)">0.32</td><td style="color:var(--amber)">提升中</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <div class="itab-page" id="itab-demand-ev">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px">
+          <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">充电桩总数</div><div class="kpi-value" id="ev-count">120<span class="unit">桩</span></div><div class="kpi-delta up">↑ 正常运行</div></div>
+          <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">今日充电量</div><div class="kpi-value">8.4<span class="unit">MWh</span></div><div class="kpi-delta up">↑ 绿电供给</div></div>
+          <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">绿电充电比</div><div class="kpi-value">94<span class="unit">%</span></div><div class="kpi-delta up">↑ 优秀</div></div>
+          <div class="kpi-card t"><div class="kpi-glow"></div><div class="kpi-label">当前使用率</div><div class="kpi-value">67<span class="unit">%</span></div><div class="kpi-delta neu">80桩在用</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">🔌 充电桩站点列表</span>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-demand')">＋ 新增站点</button>
+          </div>
+          <table class="tbl" id="ev-tbl">
+            <thead><tr><th>站点名称</th><th>园区位置</th><th>桩数</th><th>当前使用率</th><th>今日充电(kWh)</th><th>绿电比例</th><th>状态</th></tr></thead>
+            <tbody id="ev-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: 绿电交易 ══ -->
+    <div class="page" id="page-trade">
+      <div class="sec-hdr"><div class="sec-title">绿电交易 & 绿证管理</div></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2)">
+        <div style="flex:1;padding:10px 8px;border-radius:var(--r);text-align:center;font-size:11px;font-weight:500;border:1px solid var(--greendim);background:var(--greenglw);color:var(--green)">风电/光伏<div style="font-size:9px;opacity:.7;margin-top:3px">发电侧</div></div>
+        <div style="font-size:14px;color:var(--text3)">→</div>
+        <div style="flex:1;padding:10px 8px;border-radius:var(--r);text-align:center;font-size:11px;font-weight:500;border:1px solid rgba(232,166,26,.3);background:var(--amberdim);color:var(--amber)">GreenGrid交易撮合<div style="font-size:9px;opacity:.7;margin-top:3px">平台层</div></div>
+        <div style="font-size:14px;color:var(--text3)">→</div>
+        <div style="flex:1;padding:10px 8px;border-radius:var(--r);text-align:center;font-size:11px;font-weight:500;border:1px solid rgba(59,143,212,.3);background:var(--bluedim);color:var(--blue)">工业/算力/充电<div style="font-size:9px;opacity:.7;margin-top:3px">用电侧</div></div>
+        <div style="font-size:14px;color:var(--text3)">→</div>
+        <div style="flex:1;padding:10px 8px;border-radius:var(--r);text-align:center;font-size:11px;font-weight:500;border:1px solid var(--greendim);background:var(--greenglw);color:var(--green)">绿证&碳账户<div style="font-size:9px;opacity:.7;margin-top:3px">自动核发</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">本月交易记录</span><span class="panel-meta">2025年4月</span></div>
+          <table class="tbl"><thead><tr><th>交易日</th><th>电量(MWh)</th><th>单价(元/kWh)</th><th>金额(万元)</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>4月27日</td><td>1,180</td><td>0.59</td><td>69.6</td><td style="color:var(--amber)">待确认</td></tr>
+            <tr><td>4月25日</td><td>1,240</td><td>0.58</td><td>71.9</td><td style="color:var(--green)">已结算</td></tr>
+            <tr><td>4月22日</td><td>980</td><td>0.56</td><td>54.9</td><td style="color:var(--green)">已结算</td></tr>
+            <tr><td>4月19日</td><td>1,560</td><td>0.57</td><td>88.9</td><td style="color:var(--green)">已结算</td></tr>
+            <tr><td>4月16日</td><td>820</td><td>0.55</td><td>45.1</td><td style="color:var(--green)">已结算</td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">绿证统计</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px;text-align:center"><div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">5,780</div><div style="font-size:9px;color:var(--text3);margin-top:2px">已核发(张)</div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px;text-align:center"><div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)">5,201</div><div style="font-size:9px;color:var(--text3);margin-top:2px">已使用</div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px;text-align:center"><div style="font-family:var(--mono);font-size:15px;font-weight:700">579</div><div style="font-size:9px;color:var(--text3);margin-top:2px">待使用</div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:9px;text-align:center"><div style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--amber)">¥320万</div><div style="font-size:9px;color:var(--text3);margin-top:2px">交易收益</div></div>
+          </div>
+          <div style="padding:9px 11px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r);font-size:10px;color:var(--text3);line-height:1.7">💡 已对接<span style="color:var(--green)">北京绿色交易所API</span>，绿证申领自动化率 <span style="color:var(--green);font-weight:600">98.2%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: 碳管理 ══ -->
+    <div class="page" id="page-carbon">
+      <div class="sec-hdr"><div class="sec-title">碳排放核算 — Scope 1·2·3</div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">Scope 1 · 直接排放</div><div class="kpi-value">184<span class="unit">tCO₂</span></div><div class="kpi-delta up">↓ 同比降18%</div></div>
+        <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">Scope 2 · 电力间接</div><div class="kpi-value">320<span class="unit">tCO₂</span></div><div class="kpi-delta up">绿证抵消后净值</div></div>
+        <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">Scope 3 · 供应链</div><div class="kpi-value">1,240<span class="unit">tCO₂</span></div><div class="kpi-delta neu">追踪覆盖67%</div></div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">企业碳排放排名</span></div>
+          <table class="tbl"><thead><tr><th>企业</th><th>排放量(t)</th><th>绿电抵消(t)</th><th>净排放</th></tr></thead>
+          <tbody>
+            <tr><td>三星存储西安</td><td>3,840</td><td style="color:var(--green)">-2,340</td><td>1,500</td></tr>
+            <tr><td>比亚迪西安工厂</td><td>2,960</td><td style="color:var(--green)">-1,720</td><td>1,240</td></tr>
+            <tr><td>阿里云西安节点</td><td>1,850</td><td style="color:var(--green)">-1,620</td><td>230</td></tr>
+            <tr><td>隆基绿能厂区</td><td>1,200</td><td style="color:var(--green)">-1,150</td><td>50</td></tr>
+            <tr><td>华为西安数据中心</td><td>1,740</td><td style="color:var(--green)">-1,740</td><td style="color:var(--green);font-weight:600">0 净零</td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">年度减排追踪</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <div class="gauge-wrap"><svg width="110" height="66" viewBox="0 0 110 66"><path d="M7 64A48 48 0 0 1 103 64" fill="none" stroke="#162118" stroke-width="9" stroke-linecap="round"/><path d="M7 64A48 48 0 0 1 103 64" fill="none" stroke="#1fbe82" stroke-width="9" stroke-linecap="round" stroke-dasharray="150" stroke-dashoffset="37"/></svg><div class="gauge-num">78%</div></div>
+            <div style="font-size:10px;color:var(--text3)">年度目标 650t CO₂</div>
+            <div style="padding:9px 11px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r);font-size:10px;color:var(--text3);line-height:1.7;width:100%">📋 MRV报告已自动生成 · 符合 <span style="color:var(--green)">ISO 14064</span> · <span style="color:var(--green)">CCER</span> 标准</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: 告警 ══ -->
+    <div class="page" id="page-alerts">
+      <div class="sec-hdr"><div class="sec-title">告警中心</div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+        <div class="kpi-card" style="border-top:2px solid var(--red)"><div class="kpi-label">严重</div><div class="kpi-value" style="color:var(--red)">1<span class="unit">条</span></div><div class="kpi-delta" style="color:var(--red)">需立即处理</div></div>
+        <div class="kpi-card" style="border-top:2px solid var(--amber)"><div class="kpi-label">警告</div><div class="kpi-value" style="color:var(--amber)">1<span class="unit">条</span></div><div class="kpi-delta neu">24h内处理</div></div>
+        <div class="kpi-card" style="border-top:2px solid var(--blue)"><div class="kpi-label">通知</div><div class="kpi-value" style="color:var(--blue)">3<span class="unit">条</span></div><div class="kpi-delta" style="color:var(--blue)">本周累计</div></div>
+        <div class="kpi-card" style="border-top:2px solid var(--green)"><div class="kpi-label">今日已处理</div><div class="kpi-value" style="color:var(--green)">7<span class="unit">条</span></div><div class="kpi-delta up">↑ 均值14min</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><span class="panel-title">告警列表</span></div>
+        <div id="alert-list">
+          <div class="alert-item" id="alert-1">
+            <div class="alert-dot" style="background:var(--red);box-shadow:0 0 6px var(--red);animation:pulse 1.5s infinite;margin-top:3px"></div>
+            <div style="flex:1"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span class="badge r">严重</span><span style="font-size:12px;font-weight:500;color:var(--text)">逆变器 #12 离线 — 通信中断</span></div><div style="font-size:10px;color:var(--text3);line-height:1.6">设备：配电室B · 高新区光伏B区 · 影响 <span style="color:var(--amber)">280kW</span> · 触发 09:42 · 已持续 4h18min</div></div>
+            <div style="display:flex;gap:5px;flex-shrink:0"><button class="btn btn-primary btn-sm" onclick="resolveAlert('alert-1')">处理</button><button class="btn btn-secondary btn-sm">详情</button></div>
+          </div>
+          <div class="alert-item" id="alert-2">
+            <div class="alert-dot" style="background:var(--amber);margin-top:3px"></div>
+            <div style="flex:1"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span class="badge a">警告</span><span style="font-size:12px;font-weight:500;color:var(--text)">储能电池组B 温度异常</span></div><div style="font-size:10px;color:var(--text3);line-height:1.6">当前 <span style="color:var(--amber)">38.2°C</span>，超阈值35°C · 已启用液冷加强 · 触发12:15</div></div>
+            <div style="display:flex;gap:5px;flex-shrink:0"><button class="btn btn-primary btn-sm" onclick="resolveAlert('alert-2')">处理</button><button class="btn btn-secondary btn-sm">详情</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: 报告 ══ -->
+    <div class="page" id="page-reports">
+      <div class="sec-hdr"><div class="sec-title">报告中心</div></div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">生成报告</span></div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text)">月度绿电消纳报告</div><div style="font-size:10px;color:var(--text3);margin-top:2px">2025年4月 · ISO14064格式</div></div>
+              <button class="btn btn-primary btn-sm" onclick="fakeDownload(this)">生成PDF</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text)">碳排放MRV报告</div><div style="font-size:10px;color:var(--text3);margin-top:2px">2025 Q1 · Scope 1+2+3</div></div>
+              <button class="btn btn-primary btn-sm" onclick="fakeDownload(this)">生成PDF</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text)">企业ESG绿电证明</div><div style="font-size:10px;color:var(--text3);margin-top:2px">批量生成 · 含绿证编号</div></div>
+              <button class="btn btn-primary btn-sm" onclick="fakeDownload(this)">生成PDF</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+              <div><div style="font-size:12px;font-weight:500;color:var(--text)">绿电交易台账</div><div style="font-size:10px;color:var(--text3);margin-top:2px">可选月份 · 含交易明细</div></div>
+              <button class="btn btn-secondary btn-sm" onclick="fakeDownload(this)">生成XLSX</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">历史报告归档</span></div>
+          <table class="tbl"><thead><tr><th>报告名称</th><th>生成时间</th><th>类型</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td>月度绿电消纳报告_2025-03</td><td style="font-family:var(--mono);font-size:10px">04-02</td><td><span class="badge g">PDF</span></td><td><span style="color:var(--blue);cursor:pointer;font-size:11px">下载</span></td></tr>
+            <tr><td>MRV碳排放报告_2024-Q4</td><td style="font-family:var(--mono);font-size:10px">01-10</td><td><span class="badge g">PDF</span></td><td><span style="color:var(--blue);cursor:pointer;font-size:11px">下载</span></td></tr>
+            <tr><td>绿电交易台账_2025-03</td><td style="font-family:var(--mono);font-size:10px">04-01</td><td><span class="badge b">XLSX</span></td><td><span style="color:var(--blue);cursor:pointer;font-size:11px">下载</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: 系统管理 ══ -->
+    <div class="page" id="page-system">
+      <div class="sec-hdr">
+        <div class="sec-title">系统管理</div>
+      </div>
+
+      <div class="inner-tabs">
+        <button class="itab active" onclick="switchInnerTab('users',this)">用户管理</button>
+        <button class="itab" onclick="switchInnerTab('roles',this)">角色管理</button>
+        <button class="itab" onclick="switchInnerTab('permissions',this)">权限管理</button>
+        <button class="itab" onclick="switchInnerTab('config',this)">系统配置</button>
+        <button class="itab" onclick="switchInnerTab('audit',this)">操作审计</button>
+      </div>
+
+      <!-- USERS -->
+      <div class="itab-page active" id="itab-users">
+        <div class="sec-hdr" style="margin-bottom:12px">
+          <div style="font-size:12px;color:var(--text2)">管理平台系统用户、账号状态与所属角色</div>
+          <button class="btn btn-primary" onclick="openModal('modal-add-user')">＋ 新增用户</button>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title">用户列表</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input class="form-input" style="width:160px;padding:5px 9px;font-size:11px" placeholder="搜索用户..." oninput="filterTable(this,'user-tbl')">
+              <select class="form-select" style="width:120px;padding:5px 8px;font-size:11px">
+                <option>全部角色</option>
+                <option>超级管理员</option>
+                <option>运营管理员</option>
+                <option>数据分析师</option>
+                <option>供给侧操作员</option>
+                <option>需求侧操作员</option>
+                <option>只读用户</option>
+              </select>
+            </div>
+          </div>
+          <table class="tbl" id="user-tbl">
+            <thead><tr><th>用户名</th><th>姓名</th><th>角色</th><th>所属部门</th><th>上次登录</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="user-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ROLES -->
+      <div class="itab-page" id="itab-roles">
+        <div class="sec-hdr" style="margin-bottom:12px">
+          <div style="font-size:12px;color:var(--text2)">定义系统角色及其权限集合</div>
+          <button class="btn btn-primary" onclick="openModal('modal-add-role')">＋ 新建角色</button>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">角色列表</span></div>
+            <table class="tbl">
+              <thead><tr><th>角色名称</th><th>描述</th><th>用户数</th><th>权限数</th><th>操作</th></tr></thead>
+              <tbody id="role-tbody"></tbody>
+            </table>
+          </div>
+          <div class="panel" id="role-detail-panel">
+            <div class="panel-hdr"><span class="panel-title" id="role-detail-title">选择角色查看权限</span></div>
+            <div id="role-perms-display" style="color:var(--text3);font-size:11px;padding:20px 0;text-align:center">点击角色行查看权限详情</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERMISSIONS -->
+      <div class="itab-page" id="itab-permissions">
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title">权限矩阵 — 角色 × 功能模块</span>
+            <span class="panel-meta">✓ 有权限  ✗ 无权限</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl" id="perm-matrix"></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="itab-page" id="itab-config">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">平台基础配置</span></div>
+            <div class="form-group"><label class="form-label">平台名称</label><input class="form-input" value="GreenGrid · 西安周边园区绿色能源管理平台"></div>
+            <div class="form-group"><label class="form-label">园区覆盖范围</label><input class="form-input" value="高新区、经开区、航天基地、西咸新区、沣东新城"></div>
+            <div class="form-group"><label class="form-label">数据刷新间隔</label>
+              <select class="form-select"><option>5秒</option><option selected>10秒</option><option>30秒</option><option>1分钟</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">告警通知方式</label>
+              <select class="form-select"><option selected>短信 + 系统内通知</option><option>邮件 + 系统内通知</option><option>仅系统内通知</option></select>
+            </div>
+            <button class="btn btn-primary" onclick="showToast('配置已保存')">保存配置</button>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><span class="panel-title">绿电交易配置</span></div>
+            <div class="form-group"><label class="form-label">对接交易所</label><input class="form-input" value="北京绿色交易所（API已连接）"></div>
+            <div class="form-group"><label class="form-label">绿证自动申领</label>
+              <select class="form-select"><option selected>自动申领（实时）</option><option>手动审核后申领</option><option>批量申领（每日）</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">绿电价格预警阈值（元/kWh）</label><input class="form-input" value="0.65"></div>
+            <div class="form-group"><label class="form-label">碳排放核算标准</label>
+              <select class="form-select"><option selected>ISO 14064-1:2018</option><option>GHG Protocol</option><option>CCER方法学</option></select>
+            </div>
+            <button class="btn btn-primary" onclick="showToast('配置已保存')">保存配置</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIT -->
+      <div class="itab-page" id="itab-audit">
+        <div class="panel">
+          <div class="panel-hdr"><span class="panel-title">操作审计日志</span><span class="panel-meta">最近100条</span></div>
+          <table class="tbl">
+            <thead><tr><th>时间</th><th>用户</th><th>IP</th><th>操作模块</th><th>操作内容</th><th>结果</th></tr></thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-system -->
+
+    <!-- ══ PAGE: 储能 (sidebar shortcut) ══ -->
+    <div class="page" id="page-storage">
+      <div class="sec-hdr"><div class="sec-title">储能系统管理</div></div>
+      <div class="kpi-grid">
+        <div class="kpi-card t"><div class="kpi-glow"></div><div class="kpi-label">当前SOC</div><div class="kpi-value">76<span class="unit">%</span></div><div class="kpi-delta up">↑ 充电中</div></div>
+        <div class="kpi-card g"><div class="kpi-glow"></div><div class="kpi-label">充电功率</div><div class="kpi-value">512<span class="unit">kW</span></div><div class="kpi-delta up">↑ 谷电充储</div></div>
+        <div class="kpi-card b"><div class="kpi-glow"></div><div class="kpi-label">总装机</div><div class="kpi-value">20<span class="unit">MWh</span></div><div class="kpi-delta neu">4组×5MWh</div></div>
+        <div class="kpi-card a"><div class="kpi-glow"></div><div class="kpi-label">今日套利</div><div class="kpi-value">3.2<span class="unit">万元</span></div><div class="kpi-delta up">↑ 价差0.38元</div></div>
+      </div>
+      <div class="panel" style="margin-top:12px">
+        <div class="panel-hdr"><span class="panel-title">电池组状态</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" id="bms-grid2"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app-layout -->
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- ADD SUPPLY -->
+<div class="modal-overlay" id="modal-add-supply">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">新增供给资源</span>
+      <button class="modal-close" onclick="closeModal('modal-add-supply')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">资源类型 <span style="color:var(--red)">*</span></label>
+          <select class="form-select" id="supply-type-sel" onchange="updateSupplyForm()">
+            <option value="">请选择...</option>
+            <option value="wind">风力发电</option>
+            <option value="ground-pv">地面光伏</option>
+            <option value="roof-pv">屋顶光伏</option>
+            <option value="agri-pv">农光互补光伏</option>
+            <option value="water-pv">水面漂浮光伏</option>
+            <option value="storage">储能系统</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">资源名称 <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="supply-name" placeholder="如：高新区屋顶光伏一期">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">所在位置/园区 <span style="color:var(--red)">*</span></label>
+          <select class="form-select" id="supply-location">
+            <option>高新区</option>
+            <option>经开区</option>
+            <option>航天基地</option>
+            <option>西咸新区</option>
+            <option>沣东新城</option>
+            <option>渭南</option>
+            <option>铜川</option>
+            <option>咸阳</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">详细地址</label>
+          <input class="form-input" placeholder="楼栋/地块/坐标">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">装机容量 (kW) <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="supply-capacity" type="number" placeholder="如：500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">并网电压等级</label>
+          <select class="form-select">
+            <option>380V（低压并网）</option>
+            <option>10kV（中压并网）</option>
+            <option>35kV（中压并网）</option>
+            <option>110kV（高压并网）</option>
+          </select>
+        </div>
+      </div>
+      <div id="supply-extra-fields"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">设备品牌/型号</label>
+          <input class="form-input" placeholder="如：隆基Hi-MO X6 / 华为SUN2000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">接入方式</label>
+          <select class="form-select">
+            <option>Modbus TCP</option>
+            <option>MQTT</option>
+            <option>IEC 61850</option>
+            <option>HTTP API</option>
+            <option>RS-485</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">负责人 & 联系方式</label>
+        <div class="form-row" style="margin-bottom:0">
+          <input class="form-input" placeholder="负责人姓名">
+          <input class="form-input" placeholder="手机号码">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">备注</label>
+        <textarea class="form-textarea" placeholder="投运日期、特殊说明等..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-supply')">取消</button>
+      <button class="btn btn-primary" onclick="submitSupply()">确认接入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DEMAND -->
+<div class="modal-overlay" id="modal-add-demand">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">新增需求侧主体</span>
+      <button class="modal-close" onclick="closeModal('modal-add-demand')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">主体类型 <span style="color:var(--red)">*</span></label>
+          <select class="form-select" id="demand-type-sel" onchange="updateDemandForm()">
+            <option value="">请选择...</option>
+            <option value="industry">工业企业</option>
+            <option value="datacenter">算力中心/数据中心</option>
+            <option value="ev">充电桩站点</option>
+            <option value="commercial">商业综合体</option>
+            <option value="public">公共建筑</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">主体名称 <span style="color:var(--red)">*</span></label>
+          <input class="form-input" id="demand-name" placeholder="企业/机构全称">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">所在园区 <span style="color:var(--red)">*</span></label>
+          <select class="form-select">
+            <option>高新区</option>
+            <option>经开区</option>
+            <option>航天基地</option>
+            <option>西咸新区</option>
+            <option>沣东新城</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">统一社会信用代码</label>
+          <input class="form-input" placeholder="18位代码（企业必填）">
+        </div>
+      </div>
+      <div id="demand-extra-fields"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">预计年用电量 (MWh)</label>
+          <input class="form-input" type="number" placeholder="如：50000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">绿电采购目标比例</label>
+          <select class="form-select">
+            <option>50% 以上</option>
+            <option>70% 以上</option>
+            <option>80% 以上</option>
+            <option selected>100%（全绿电）</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">智能电表型号</label>
+          <input class="form-input" placeholder="如：威胜DTSF666">
+        </div>
+        <div class="form-group">
+          <label class="form-label">数据接入方式</label>
+          <select class="form-select">
+            <option>MQTT</option>
+            <option>Modbus TCP</option>
+            <option>HTTP API</option>
+            <option>RS-485</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">联系人 & 手机</label>
+        <div class="form-row" style="margin-bottom:0">
+          <input class="form-input" placeholder="联系人姓名">
+          <input class="form-input" placeholder="手机号码">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">绿证需求说明</label>
+        <textarea class="form-textarea" placeholder="ESG报告需求、绿证用途、审计要求等..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-demand')">取消</button>
+      <button class="btn btn-primary" onclick="submitDemand()">确认接入</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD USER -->
+<div class="modal-overlay" id="modal-add-user">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">新增系统用户</span>
+      <button class="modal-close" onclick="closeModal('modal-add-user')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">用户名 <span style="color:var(--red)">*</span></label>
+          <input class="form-input" placeholder="登录用户名（字母数字）">
+          <div class="form-hint">4-20个字符，字母开头</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">姓名 <span style="color:var(--red)">*</span></label>
+          <input class="form-input" placeholder="真实姓名">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">初始密码 <span style="color:var(--red)">*</span></label>
+          <input class="form-input" type="password" placeholder="至少8位，含字母数字">
+        </div>
+        <div class="form-group">
+          <label class="form-label">确认密码</label>
+          <input class="form-input" type="password" placeholder="再次输入密码">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">分配角色 <span style="color:var(--red)">*</span></label>
+          <select class="form-select">
+            <option>超级管理员</option>
+            <option selected>运营管理员</option>
+            <option>数据分析师</option>
+            <option>供给侧操作员</option>
+            <option>需求侧操作员</option>
+            <option>只读用户</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">所属部门</label>
+          <select class="form-select">
+            <option>运营管理部</option>
+            <option>技术开发部</option>
+            <option>商务合作部</option>
+            <option>碳资产管理部</option>
+            <option>外部用户</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">手机号码</label>
+          <input class="form-input" placeholder="用于接收告警通知">
+        </div>
+        <div class="form-group">
+          <label class="form-label">邮箱</label>
+          <input class="form-input" type="email" placeholder="用于报告推送">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">数据访问范围</label>
+        <div class="perm-grid" id="user-scope-perms">
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">供给侧数据</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">需求侧数据</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">绿电交易</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">碳资产数据</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">系统配置</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">报告导出</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-user')">取消</button>
+      <button class="btn btn-primary" onclick="submitUser()">创建用户</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ROLE -->
+<div class="modal-overlay" id="modal-add-role">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">新建角色</span>
+      <button class="modal-close" onclick="closeModal('modal-add-role')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">角色名称 <span style="color:var(--red)">*</span></label>
+          <input class="form-input" placeholder="如：园区能源顾问">
+        </div>
+        <div class="form-group">
+          <label class="form-label">角色标识（英文）</label>
+          <input class="form-input" placeholder="如：energy_advisor">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">角色描述</label>
+        <textarea class="form-textarea" placeholder="该角色的职责和权限范围..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">功能权限配置</label>
+        <div class="perm-grid" id="role-perms">
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">总览查看</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">供给监控</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">需求管理</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">新增供给资源</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">新增需求主体</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">绿电交易查看</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">绿电交易操作</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">碳排放查看</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">碳资产操作</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">告警查看</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">告警处理</span></div>
+          <div class="perm-item checked" onclick="togglePerm(this)"><div class="perm-check">✓</div><span class="perm-name">报告导出</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">用户管理</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">系统配置</span></div>
+          <div class="perm-item" onclick="togglePerm(this)"><div class="perm-check"></div><span class="perm-name">审计日志</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-role')">取消</button>
+      <button class="btn btn-primary" onclick="submitRole()">创建角色</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ <span id="toast-msg"></span></div>
+
+<script>
+// ═══════════════ DATA ═══════════════
+const STATE = {
+  supplyList: [
+    { name:'渭北风电场', type:'风力', loc:'渭南/铜川', cap:'200,000kW', power:'1,435kW', date:'2023-06', status:'running' },
+    { name:'关中光伏 A区', type:'光伏', loc:'高新区', cap:'32,000kW', power:'1,840kW', date:'2023-09', status:'running' },
+    { name:'关中光伏 B区', type:'光伏', loc:'经开区', cap:'28,000kW', power:'927kW', date:'2024-01', status:'running' },
+    { name:'航天基地屋顶光伏', type:'屋顶', loc:'航天基地', cap:'5,000kW', power:'312kW', date:'2024-07', status:'running' },
+    { name:'储能系统 S-1', type:'储能', loc:'配电中心', cap:'20,000kWh', power:'512kW(充)', date:'2024-03', status:'idle' },
+  ],
+  demandList: [
+    { name:'秦川机床集团', type:'工业', park:'高新区', energy:'12,400kWh', green:'91%', date:'2023-06', status:'running' },
+    { name:'隆基绿能厂区', type:'工业', park:'高新区', energy:'21,300kWh', green:'96%', date:'2023-08', status:'running' },
+    { name:'比亚迪西安工厂', type:'工业', park:'经开区', energy:'31,500kWh', green:'62%', date:'2023-11', status:'running' },
+    { name:'三星存储西安', type:'工业', park:'经开区', energy:'44,200kWh', green:'55%', date:'2022-04', status:'running' },
+    { name:'秦创原算力中心', type:'算力', park:'西咸新区', energy:'18,600kWh', green:'100%', date:'2024-02', status:'running' },
+    { name:'华为西安数据中心', type:'算力', park:'沣东新城', energy:'38,400kWh', green:'100%', date:'2023-05', status:'running' },
+    { name:'高新区充电桩 #1', type:'充电', park:'高新区', energy:'2,100kWh', green:'94%', date:'2024-09', status:'running' },
+  ],
+  evList: [
+    { name:'高新区充电桩站 A', loc:'高新区科技路', count:'40', util:'72%', energy:'2,800kWh', green:'95%', status:'running' },
+    { name:'经开区充电站 B', loc:'经开区工业路', count:'30', util:'61%', energy:'1,900kWh', green:'92%', status:'running' },
+    { name:'沣东新城充电站', loc:'沣东新城', count:'30', util:'58%', energy:'1,700kWh', green:'96%', status:'running' },
+    { name:'航天基地快充站', loc:'航天基地内', count:'20', util:'80%', energy:'2,000kWh', green:'91%', status:'running' },
+  ],
+  userList: [
+    { uname:'zhangmy', name:'张明远', role:'超级管理员', dept:'运营管理部', lastLogin:'2025-04-27 09:12', status:'active', roleColor:'p' },
+    { uname:'lixh', name:'李晓慧', role:'运营管理员', dept:'运营管理部', lastLogin:'2025-04-27 08:45', status:'active', roleColor:'g' },
+    { uname:'wangdp', name:'王大鹏', role:'数据分析师', dept:'技术开发部', lastLogin:'2025-04-26 17:30', status:'active', roleColor:'b' },
+    { uname:'chenrj', name:'陈瑞娟', role:'供给侧操作员', dept:'运营管理部', lastLogin:'2025-04-27 10:01', status:'active', roleColor:'a' },
+    { uname:'liuhy', name:'刘海燕', role:'需求侧操作员', dept:'商务合作部', lastLogin:'2025-04-25 14:22', status:'active', roleColor:'a' },
+    { uname:'zhaoqf', name:'赵庆丰', role:'数据分析师', dept:'碳资产管理部', lastLogin:'2025-04-24 11:08', status:'active', roleColor:'b' },
+    { uname:'sunwx', name:'孙文秀', role:'只读用户', dept:'外部用户', lastLogin:'2025-04-20 09:00', status:'inactive', roleColor:'gray' },
+  ],
+  roleList: [
+    { name:'超级管理员', desc:'全系统最高权限', users:1, perms:15, color:'p', permsDetail:['全部功能','用户管理','系统配置','审计日志'] },
+    { name:'运营管理员', desc:'日常运营全功能', users:2, perms:12, color:'g', permsDetail:['总览','供给监控','需求管理','绿电交易','碳管理','告警处理','报告导出'] },
+    { name:'数据分析师', desc:'数据分析与报告导出', users:2, perms:8, color:'b', permsDetail:['总览查看','供给监控','需求数据','碳排放查看','报告导出'] },
+    { name:'供给侧操作员', desc:'供给资源运维操作', users:1, perms:6, color:'a', permsDetail:['总览查看','供给监控','新增供给资源','告警处理'] },
+    { name:'需求侧操作员', desc:'需求主体对接管理', users:1, perms:6, color:'a', permsDetail:['总览查看','需求管理','新增需求主体','绿电交易查看'] },
+    { name:'只读用户', desc:'仅查看权限', users:1, perms:3, color:'gray', permsDetail:['总览查看','绿电交易查看','碳排放查看'] },
+  ],
+  auditLog: [
+    { time:'2025-04-27 10:14', user:'张明远', ip:'192.168.1.10', module:'用户管理', action:'新增用户 liuhy', result:'成功' },
+    { time:'2025-04-27 09:42', user:'陈瑞娟', ip:'192.168.1.22', module:'供给管理', action:'新增屋顶光伏资源', result:'成功' },
+    { time:'2025-04-27 09:30', user:'张明远', ip:'192.168.1.10', module:'系统配置', action:'修改数据刷新间隔为10s', result:'成功' },
+    { time:'2025-04-26 17:15', user:'王大鹏', ip:'192.168.1.35', module:'报告中心', action:'导出MRV碳排放报告', result:'成功' },
+    { time:'2025-04-26 16:40', user:'刘海燕', ip:'192.168.1.48', module:'需求管理', action:'新增算力中心接入', result:'成功' },
+    { time:'2025-04-26 14:22', user:'赵庆丰', ip:'192.168.1.52', module:'碳管理', action:'查看Scope3数据', result:'成功' },
+    { time:'2025-04-26 11:08', user:'孙文秀', ip:'10.12.0.88', module:'总览', action:'查看实时数据', result:'成功' },
+    { time:'2025-04-25 09:00', user:'unknown', ip:'203.0.113.5', module:'登录', action:'尝试登录失败', result:'失败' },
+  ]
+};
+
+// ═══════════════ RENDER TABLES ═══════════════
+function renderSupplyTable() {
+  const tb = document.getElementById('supply-tbody');
+  if (!tb) return;
+  tb.innerHTML = STATE.supplyList.map((r,i) => `
+    <tr>
+      <td style="font-weight:500;color:var(--text)">${r.name}</td>
+      <td><span class="badge ${r.type==='风力'?'b':r.type==='储能'?'a':'g'}">${r.type}</span></td>
+      <td>${r.loc}</td>
+      <td style="font-family:var(--mono)">${r.cap}</td>
+      <td style="font-family:var(--mono);color:var(--green)">${r.power}</td>
+      <td style="font-family:var(--mono);font-size:10px">${r.date}</td>
+      <td><span class="stag ${r.status==='running'?'on':'idle'}">${r.status==='running'?'运行':'待机'}</span></td>
+      <td><div class="tbl-actions">
+        <button class="btn btn-secondary btn-sm">编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('supply',${i})">移除</button>
+      </div></td>
+    </tr>`).join('');
+  const supplyKpi = document.getElementById('supply-count-kpi');
+  if (supplyKpi) { supplyKpi.innerHTML = ''; supplyKpi.appendChild(document.createTextNode(STATE.supplyList.length)); const u=document.createElement('span');u.className='unit';u.textContent='项';supplyKpi.appendChild(u); }
+  const badge = document.getElementById('sb-supply-count');
+  if (badge) badge.textContent = STATE.supplyList.length;
+  const ov = document.getElementById('ov-supply-total');
+  if (ov) ov.textContent = STATE.supplyList.length + ' 项';
+}
+
+function renderDemandTable() {
+  const tb = document.getElementById('demand-tbody');
+  if (!tb) return;
+  const pct = v => { const n = parseInt(v); return `<span class="badge ${n>=80?'g':n>=60?'a':'r'}">${v}</span>`; };
+  tb.innerHTML = STATE.demandList.map((r,i) => `
+    <tr>
+      <td style="font-weight:500;color:var(--text)">${r.name}</td>
+      <td><span class="badge ${r.type==='工业'?'b':r.type==='算力'?'p':'g'}">${r.type}</span></td>
+      <td>${r.park}</td>
+      <td style="font-family:var(--mono)">${r.energy}</td>
+      <td>${pct(r.green)}</td>
+      <td style="font-family:var(--mono);font-size:10px">${r.date}</td>
+      <td><span class="stag on">运行</span></td>
+      <td><div class="tbl-actions">
+        <button class="btn btn-secondary btn-sm">编辑</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('demand',${i})">移除</button>
+      </div></td>
+    </tr>`).join('');
+  const kpi = document.getElementById('demand-count-kpi');
+  if (kpi) { kpi.innerHTML = ''; kpi.appendChild(document.createTextNode(STATE.demandList.length)); const u=document.createElement('span');u.className='unit';u.textContent='家';kpi.appendChild(u); }
+  const badge = document.getElementById('sb-industry-count');
+  if (badge) badge.textContent = STATE.demandList.filter(d=>d.type==='工业').length;
+  const ov = document.getElementById('ov-demand-total');
+  if (ov) ov.textContent = STATE.demandList.length + ' 家';
+}
+
+function renderEvTable() {
+  const tb = document.getElementById('ev-tbody');
+  if (!tb) return;
+  tb.innerHTML = STATE.evList.map((r,i) => `
+    <tr>
+      <td style="font-weight:500;color:var(--text)">${r.name}</td>
+      <td>${r.loc}</td>
+      <td style="font-family:var(--mono)">${r.count}</td>
+      <td style="font-family:var(--mono)">${r.util}</td>
+      <td style="font-family:var(--mono)">${r.energy}</td>
+      <td><span class="badge g">${r.green}</span></td>
+      <td><span class="stag on">运行</span></td>
+    </tr>`).join('');
+  const kpi = document.getElementById('ev-count');
+  if (kpi) { const total = STATE.evList.reduce((s,r)=>s+parseInt(r.count),0); kpi.innerHTML = ''; kpi.appendChild(document.createTextNode(total)); const u=document.createElement('span');u.className='unit';u.textContent='桩';kpi.appendChild(u); }
+}
+
+function renderUserTable() {
+  const tb = document.getElementById('user-tbody');
+  if (!tb) return;
+  tb.innerHTML = STATE.userList.map((u,i) => `
+    <tr>
+      <td style="font-family:var(--mono);color:var(--text)">${u.uname}</td>
+      <td>${u.name}</td>
+      <td><span class="badge ${u.roleColor}">${u.role}</span></td>
+      <td style="color:var(--text2)">${u.dept}</td>
+      <td style="font-family:var(--mono);font-size:10px">${u.lastLogin}</td>
+      <td><span class="stag ${u.status==='active'?'on':'off'}">${u.status==='active'?'启用':'停用'}</span></td>
+      <td><div class="tbl-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openModal('modal-add-user')">编辑</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleUserStatus(${i})">
+          ${u.status==='active'?'停用':'启用'}
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow('user',${i})">删除</button>
+      </div></td>
+    </tr>`).join('');
+  const ov = document.getElementById('ov-user-total');
+  if (ov) ov.textContent = STATE.userList.length + ' 人';
+}
+
+function renderRoleTable() {
+  const tb = document.getElementById('role-tbody');
+  if (!tb) return;
+  tb.innerHTML = STATE.roleList.map((r,i) => `
+    <tr style="cursor:pointer" onclick="showRoleDetail(${i})">
+      <td style="font-weight:500;color:var(--text)">${r.name}</td>
+      <td style="color:var(--text2)">${r.desc}</td>
+      <td style="font-family:var(--mono)">${r.users}</td>
+      <td style="font-family:var(--mono)">${r.perms}</td>
+      <td><div class="tbl-actions">
+        <button class="btn btn-secondary btn-sm">编辑</button>
+        ${i>0?`<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteRow('role',${i})">删除</button>`:''}
+      </div></td>
+    </tr>`).join('');
+}
+
+function showRoleDetail(i) {
+  const r = STATE.roleList[i];
+  document.getElementById('role-detail-title').textContent = r.name + ' · 权限详情';
+  const el = document.getElementById('role-perms-display');
+  el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:6px">${r.permsDetail.map(p=>`<span class="badge ${r.color}" style="font-size:10px;padding:3px 8px">${p}</span>`).join('')}</div>`;
+}
+
+function renderPermMatrix() {
+  const tbl = document.getElementById('perm-matrix');
+  if (!tbl) return;
+  const mods = ['总览查看','供给监控','新增供给','需求管理','新增需求','绿电交易','碳管理','告警处理','报告导出','用户管理','系统配置'];
+  const rolePerms = {
+    '超级管理员': [1,1,1,1,1,1,1,1,1,1,1],
+    '运营管理员': [1,1,1,1,1,1,1,1,1,0,0],
+    '数据分析师': [1,1,0,1,0,1,1,0,1,0,0],
+    '供给侧操作员': [1,1,1,0,0,0,0,1,0,0,0],
+    '需求侧操作员': [1,0,0,1,1,1,0,0,0,0,0],
+    '只读用户': [1,0,0,0,0,1,1,0,0,0,0],
+  };
+  const roles = Object.keys(rolePerms);
+  tbl.innerHTML = `<thead><tr><th>功能模块</th>${roles.map(r=>`<th>${r}</th>`).join('')}</tr></thead>
+  <tbody>${mods.map((m,mi)=>`<tr><td>${m}</td>${roles.map(r=>`<td style="text-align:center;font-family:var(--mono);font-size:13px;color:${rolePerms[r][mi]?'var(--green)':'var(--border2)'}">${rolePerms[r][mi]?'✓':'·'}</td>`).join('')}</tr>`).join('')}</tbody>`;
+}
+
+function renderAuditLog() {
+  const tb = document.getElementById('audit-tbody');
+  if (!tb) return;
+  tb.innerHTML = STATE.auditLog.map(r => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:10px">${r.time}</td>
+      <td style="color:var(--text)">${r.user}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--text3)">${r.ip}</td>
+      <td>${r.module}</td>
+      <td style="color:var(--text2)">${r.action}</td>
+      <td><span class="badge ${r.result==='成功'?'g':'r'}">${r.result}</span></td>
+    </tr>`).join('');
+}
+
+function renderBMS(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const groups = [
+    {id:'A',soc:78,temp:32.4,status:'正常',c:'var(--green)'},
+    {id:'B',soc:75,temp:38.2,status:'偏高',c:'var(--amber)'},
+    {id:'C',soc:79,temp:31.8,status:'正常',c:'var(--green)'},
+    {id:'D',soc:74,temp:33.1,status:'正常',c:'var(--green)'},
+  ];
+  el.innerHTML = groups.map(g=>`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)">电池组 ${g.id}</span>
+        <span style="font-size:10px;color:${g.c}">${g.status}</span>
+      </div>
+      <div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:8px">
+        <div style="height:100%;width:${g.soc}%;background:${g.temp>36?'var(--amber)':'var(--green)'};border-radius:3px;transition:width 1s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
+        <span>SOC <span style="color:var(--text);font-family:var(--mono)">${g.soc}%</span></span>
+        <span>温度 <span style="color:${g.temp>36?'var(--amber)':'var(--text)'};font-family:var(--mono)">${g.temp}°C</span></span>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════ CHARTS ═══════════════
+function buildBars(elId, data, color, maxH) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const mx = Math.max(...data);
+  el.innerHTML = '';
+  data.forEach((v,i) => {
+    const b = document.createElement('div');
+    b.style.cssText = `flex:1;height:${Math.max(2,Math.round((v/mx)*maxH))}px;background:${Array.isArray(color)?color[i]:color};border-radius:1px 1px 0 0;align-self:flex-end;opacity:0.85`;
+    el.appendChild(b);
+  });
+}
+
+// ═══════════════ BREADCRUMB ═══════════════
+const PAGE_TITLES = {
+  'overview': '总览',
+  'supply-mgmt': '供给管理',
+  'demand-mgmt': '需求管理',
+  'trade': '绿电交易',
+  'carbon': '碳排放核算',
+  'alerts': '告警中心',
+  'reports': '报告中心',
+  'system': '系统管理',
+  'storage': '储能系统',
+};
+const ITAB_TITLES = {
+  'supply-list':'供给资源总览','supply-wind':'风力发电','supply-solar':'光伏发电',
+  'supply-storage':'储能系统','supply-monitor':'实时监控',
+  'demand-list':'主体总览','demand-industry':'工业企业','demand-dc':'算力中心','demand-ev':'充电桩网络',
+  'users':'用户管理','roles':'角色管理','permissions':'权限管理','config':'系统配置','audit':'操作审计',
+};
+function setBreadcrumb(pageId, itabId) {
+  const bc = document.getElementById('breadcrumb');
+  if (!bc) return;
+  const p = PAGE_TITLES[pageId] || pageId;
+  const t = itabId ? ITAB_TITLES[itabId] : null;
+  if (!t || t === p) {
+    bc.innerHTML = `<span style="color:var(--text2)">${p}</span>`;
+  } else {
+    bc.innerHTML = `<span style="color:var(--text3);cursor:pointer" onclick="navSimple('${pageId}')">${p}</span>
+      <span style="color:var(--border2)">/</span>
+      <span style="color:var(--text2)">${t}</span>`;
+  }
+}
+
+// ═══════════════ NAV HELPERS ═══════════════
+function _clearSidebar() {
+  document.querySelectorAll('.sb-item,.sb-overview').forEach(el => el.classList.remove('active'));
+}
+function _showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+}
+function _activateItab(itabId) {
+  if (!itabId) return;
+  const pg = document.getElementById('itab-' + itabId);
+  if (!pg) return;
+  const parent = pg.closest('.page');
+  if (!parent) return;
+  parent.querySelectorAll('.itab-page').forEach(p => p.classList.remove('active'));
+  pg.classList.add('active');
+  parent.querySelectorAll('.itab').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('itab-btn-' + itabId);
+  if (btn) btn.classList.add('active');
+}
+
+// Called from sidebar items in supply/demand sections
+function navTo(pageId, itabId, sideEl) {
+  _showPage(pageId);
+  _clearSidebar();
+  if (sideEl) sideEl.classList.add('active');
+  _activateItab(itabId);
+  setBreadcrumb(pageId, itabId);
+}
+
+// Called from simple pages (trade, carbon, alerts, reports)
+function navSimple(pageId, sideEl) {
+  _showPage(pageId);
+  _clearSidebar();
+  if (sideEl) sideEl.classList.add('active');
+  setBreadcrumb(pageId, null);
+}
+
+// Called from system sub-items
+function navSystem(itabId, sideEl) {
+  _showPage('system');
+  _clearSidebar();
+  if (sideEl) sideEl.classList.add('active');
+  _activateItab(itabId);
+  setBreadcrumb('system', itabId);
+}
+
+// Overview shortcut
+function navOverview(el) {
+  _showPage('overview');
+  _clearSidebar();
+  if (el) el.classList.add('active');
+  setBreadcrumb('overview', null);
+}
+
+// Legacy showPage used by modals/etc that still reference it
+function showPage(id, navEl, sideEl) {
+  _showPage(id);
+  _clearSidebar();
+  if (sideEl) sideEl.classList.add('active');
+  setBreadcrumb(id, null);
+}
+
+function goSystem() {
+  _showPage('system');
+  _clearSidebar();
+  setBreadcrumb('system', 'users');
+  _activateItab('users');
+}
+
+function switchInnerTab(id, el) {
+  const pg = document.getElementById('itab-' + id);
+  if (!pg) return;
+  const parent = pg.closest('.page');
+  if (!parent) return;
+  parent.querySelectorAll('.itab-page').forEach(p => p.classList.remove('active'));
+  pg.classList.add('active');
+  if (el) {
+    pg.closest('.page').querySelectorAll('.itab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+}
+
+// ═══════════════ MODALS ═══════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ═══════════════ FORM DYNAMICS ═══════════════
+function updateSupplyForm() {
+  const t = document.getElementById('supply-type-sel').value;
+  const el = document.getElementById('supply-extra-fields');
+  const extras = {
+    'roof-pv': `<div class="form-row"><div class="form-group"><label class="form-label">屋顶类型</label><select class="form-select"><option>彩钢瓦屋顶</option><option>混凝土屋顶</option><option>BIPV（光伏建筑一体化）</option></select></div><div class="form-group"><label class="form-label">屋顶面积 (㎡)</label><input class="form-input" type="number" placeholder="如：5000"></div></div>`,
+    'wind': `<div class="form-row"><div class="form-group"><label class="form-label">风机台数</label><input class="form-input" type="number" placeholder="如：10"></div><div class="form-group"><label class="form-label">单机容量 (kW)</label><input class="form-input" type="number" placeholder="如：2000"></div></div>`,
+    'storage': `<div class="form-row"><div class="form-group"><label class="form-label">电池类型</label><select class="form-select"><option>磷酸铁锂</option><option>三元锂</option><option>液流电池</option></select></div><div class="form-group"><label class="form-label">充放电时长 (h)</label><input class="form-input" type="number" placeholder="如：2"></div></div>`,
+    'agri-pv': `<div class="form-row"><div class="form-group"><label class="form-label">农业用途</label><select class="form-select"><option>蔬菜种植</option><option>水产养殖</option><option>中草药种植</option><option>其他</option></select></div><div class="form-group"><label class="form-label">光伏支架高度(m)</label><input class="form-input" type="number" placeholder="如：3.5"></div></div>`,
+  };
+  el.innerHTML = extras[t] || '';
+}
+
+function updateDemandForm() {
+  const t = document.getElementById('demand-type-sel').value;
+  const el = document.getElementById('demand-extra-fields');
+  const extras = {
+    'datacenter': `<div class="form-row"><div class="form-group"><label class="form-label">机架数量</label><input class="form-input" type="number" placeholder="如：500"></div><div class="form-group"><label class="form-label">当前PUE</label><input class="form-input" type="number" step="0.01" placeholder="如：1.4"></div></div>`,
+    'ev': `<div class="form-row"><div class="form-group"><label class="form-label">充电桩数量</label><input class="form-input" type="number" placeholder="如：30"></div><div class="form-group"><label class="form-label">单桩功率 (kW)</label><select class="form-select"><option>7kW 慢充</option><option>30kW 快充</option><option selected>60kW 快充</option><option>120kW 超快充</option><option>180kW 超快充</option></select></div></div>`,
+    'industry': `<div class="form-row"><div class="form-group"><label class="form-label">行业类别</label><select class="form-select"><option>电子制造</option><option>汽车零部件</option><option>精密机械</option><option>新能源材料</option><option>其他</option></select></div><div class="form-group"><label class="form-label">用电峰值功率 (kW)</label><input class="form-input" type="number" placeholder="如：5000"></div></div>`,
+  };
+  el.innerHTML = extras[t] || '';
+}
+
+// ═══════════════ SUBMIT ACTIONS ═══════════════
+function submitSupply() {
+  const name = document.getElementById('supply-name').value.trim();
+  const type = document.getElementById('supply-type-sel');
+  const cap = document.getElementById('supply-capacity').value;
+  const loc = document.getElementById('supply-location').value;
+  if (!name || !type.value || !cap) { showToast('请填写必填项', true); return; }
+  const typeMap = {wind:'风力','ground-pv':'光伏','roof-pv':'屋顶','agri-pv':'农光','water-pv':'水面','storage':'储能'};
+  STATE.supplyList.push({ name, type:typeMap[type.value]||'光伏', loc, cap:cap+'kW', power:'--', date:new Date().toISOString().slice(0,7), status:'running' });
+  renderSupplyTable();
+  closeModal('modal-add-supply');
+  showToast('供给资源「' + name + '」已成功接入');
+  addAudit('陈瑞娟','供给管理','新增资源: ' + name);
+}
+
+function submitDemand() {
+  const name = document.getElementById('demand-name').value.trim();
+  const type = document.getElementById('demand-type-sel');
+  if (!name || !type.value) { showToast('请填写必填项', true); return; }
+  const typeMap = {industry:'工业',datacenter:'算力',ev:'充电',commercial:'商业',public:'公共'};
+  STATE.demandList.push({ name, type:typeMap[type.value]||'工业', park:'高新区', energy:'--', green:'--', date:new Date().toISOString().slice(0,7), status:'running' });
+  renderDemandTable();
+  closeModal('modal-add-demand');
+  showToast('需求主体「' + name + '」已成功接入');
+  addAudit('刘海燕','需求管理','新增需求主体: ' + name);
+}
+
+function submitUser() {
+  closeModal('modal-add-user');
+  showToast('新用户已创建，初始密码已发送至手机');
+  addAudit('张明远','用户管理','新增用户');
+  renderUserTable();
+}
+
+function submitRole() {
+  closeModal('modal-add-role');
+  showToast('角色已创建');
+  addAudit('张明远','角色管理','新建角色');
+}
+
+// ═══════════════ TABLE HELPERS ═══════════════
+function deleteRow(type, i) {
+  if (type === 'supply') { STATE.supplyList.splice(i,1); renderSupplyTable(); showToast('已移除供给资源'); }
+  else if (type === 'demand') { STATE.demandList.splice(i,1); renderDemandTable(); showToast('已移除需求主体'); }
+  else if (type === 'user') { STATE.userList.splice(i,1); renderUserTable(); showToast('已删除用户'); }
+  else if (type === 'role') { STATE.roleList.splice(i,1); renderRoleTable(); showToast('已删除角色'); }
+}
+
+function toggleUserStatus(i) {
+  STATE.userList[i].status = STATE.userList[i].status === 'active' ? 'inactive' : 'active';
+  renderUserTable();
+  showToast('用户状态已更新');
+}
+
+function filterTable(input, tblId) {
+  const q = input.value.toLowerCase().trim();
+  const rows = document.querySelectorAll('#' + tblId + ' tbody tr');
+  rows.forEach(r => {
+    r.style.display = (!q || r.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+}
+
+// ═══════════════ MISC INTERACTIONS ═══════════════
+function togglePerm(el) { el.classList.toggle('checked'); el.querySelector('.perm-check').textContent = el.classList.contains('checked') ? '✓' : ''; }
+
+function resolveAlert(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.opacity = '0.4'; el.style.pointerEvents = 'none'; }
+  const badge = document.getElementById('alert-badge');
+  if (badge) badge.textContent = Math.max(0, parseInt(badge.textContent) - 1);
+  showToast('告警已处理');
+  addAudit('陈瑞娟','告警中心','处理告警: ' + id);
+}
+
+function fakeDownload(btn) {
+  const orig = btn.textContent;
+  btn.textContent = '生成中...'; btn.disabled = true;
+  setTimeout(() => { btn.textContent = '✓ 已生成'; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000); }, 1200);
+}
+
+function addAudit(user, module, action) {
+  STATE.auditLog.unshift({ time: new Date().toLocaleString('zh-CN').replace(/\//g,'-'), user, ip:'192.168.1.10', module, action, result:'成功' });
+  renderAuditLog();
+}
+
+let toastTimer;
+function showToast(msg, isErr) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toast-msg');
+  m.textContent = msg;
+  t.style.borderColor = isErr ? 'var(--red)' : 'var(--green2)';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════ CLOCK & INIT ═══════════════
+function updateClock() {
+  const now = new Date();
+  const ck = document.getElementById('clock');
+  if (ck) ck.textContent = now.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const dd = document.getElementById('date-display');
+  if (dd) dd.textContent = now.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+}
+
+function init() {
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // trend
+  const days7=[36,42,38,49,44,52,46],mx7=52;
+  const t7=document.getElementById('trend7d');
+  if(t7){days7.forEach((v,i)=>{const b=document.createElement('div');b.style.cssText=`flex:1;height:${Math.round((v/mx7)*44)}px;background:${i===6?'#1fbe82':'#1c2b1e'};border:1px solid ${i===6?'#1fbe82':'#253328'};border-radius:1px 1px 0 0;`;t7.appendChild(b);})}
+
+  // forecast
+  const fh=[0,15,80,260,420,500,540,560,520,460,360,220,90,25,5];
+  buildBars('fc-bars',fh,fh.map((_,i)=>i>=3&&i<=11?'#1fbe82':'#1c2b1e'),68);
+
+  // charts
+  buildBars('wind-chart',[410,380,420,450,480,510,490,460,440,420,400,380,420,460,498,525,510,480,460,440,420,410,395,380],'#3b8fd4',60);
+  buildBars('solar-chart',[0,0,0,0,8,50,180,380,600,780,900,960,940,880,780,640,460,280,110,30,5,0,0,0],'#e8a61a',60);
+  buildBars('wind-chart-detail',[410,380,420,450,480,510,490,460,440,420,400,380,420,460,498,525,510,480,460,440,420,410,395,380],'#3b8fd4',76);
+  buildBars('solar-chart-detail',[0,0,0,0,8,50,180,380,600,780,900,960,940,880,780,640,460,280,110,30,5,0,0,0],'#e8a61a',76);
+
+  // wind turbine list
+  const wt = document.getElementById('wind-turbines');
+  if (wt) {
+    const turbines = [
+      {id:'#1',spd:7.6,pwr:1980,s:'on'},{id:'#2',spd:7.4,pwr:1920,s:'on'},
+      {id:'#3',spd:7.8,pwr:2000,s:'on'},{id:'#4',spd:6.9,pwr:1760,s:'on'},
+      {id:'#5',spd:7.2,pwr:1840,s:'on'},{id:'#6',spd:7.5,pwr:1960,s:'on'},
+      {id:'#7',spd:0,pwr:0,s:'off'},{id:'#8',spd:7.1,pwr:1800,s:'on'},
+      {id:'#9',spd:7.3,pwr:1880,s:'on'},{id:'#10',spd:4.2,pwr:0,s:'idle'},
+    ];
+    wt.innerHTML = turbines.map(t=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r)">
+        <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text);width:28px">风机${t.id}</span>
+        <span style="font-size:10px;color:var(--text3)">${t.spd?t.spd+'m/s':'--'}</span>
+        <span style="font-family:var(--mono);font-size:10px;color:${t.s==='on'?'var(--green)':t.s==='idle'?'var(--amber)':'var(--text3)'}">${t.pwr?t.pwr+'kW':'停机'}</span>
+        <span class="stag ${t.s==='on'?'on':t.s==='idle'?'idle':'off'}">${t.s==='on'?'运行':t.s==='idle'?'待机':'停机'}</span>
+      </div>`).join('');
+  }
+
+  // tables & grids
+  renderSupplyTable();
+  renderDemandTable();
+  renderEvTable();
+  renderUserTable();
+  renderRoleTable();
+  renderPermMatrix();
+  renderAuditLog();
+  renderBMS('bms-grid');
+  renderBMS('bms-grid2');
+
+  // live jitter — update text node only, preserve the <span class="unit"> child
+  function setKpiText(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // first child is a text node; if not, create one
+    if (el.firstChild && el.firstChild.nodeType === 3) {
+      el.firstChild.nodeValue = val;
+    } else {
+      el.insertBefore(document.createTextNode(val), el.firstChild);
+    }
+  }
+  setInterval(()=>{
+    const v = (5124 + Math.floor(Math.random()*80) - 40).toLocaleString();
+    setKpiText('kpi-gen', v);
+    setKpiText('supply-power', v);
+  },3000);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
